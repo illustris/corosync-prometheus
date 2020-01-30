@@ -1,0 +1,29 @@
+[Unit]
+Description=Prometheus exporter for corosync metrics
+ConditionPathExists=/opt/corosync_prometheus_exporter.py
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+LimitNOFILE=1024
+
+Restart=on-failure
+RestartSec=10
+startLimitIntervalSec=60
+
+WorkingDirectory=/opt/
+ExecStart=/opt/corosync_prometheus_exporter.py
+
+# make sure log directory exists and owned by syslog
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/corosync-prometheus
+ExecStartPre=/bin/chown root /var/log/corosync-prometheus
+ExecStartPre=/bin/chmod 755 /var/log/corosync-prometheus
+StandardOutput=null
+StandardError=null
+SyslogIdentifier=corosync-prometheus
+
+[Install]
+WantedBy=multi-user.target
