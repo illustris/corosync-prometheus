@@ -1,0 +1,18 @@
+[Unit]
+Description=Prometheus exporter for corosync metrics
+ConditionPathExists={{ corosync_prometheus__installpath }}/{{ corosync_prometheus__scriptname }}
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+
+Restart=on-failure
+RestartSec=10
+
+WorkingDirectory={{ corosync_prometheus__installpath }}
+ExecStart={{ corosync_prometheus__installpath }}/{{ corosync_prometheus__scriptname }}
+
+[Install]
+WantedBy=multi-user.target
