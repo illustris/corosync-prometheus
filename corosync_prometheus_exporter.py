@@ -30,7 +30,11 @@ def get_metric_name(name):
 			retname = "knet_handle_"+tokes[3]
 		else:
 			retname = "knet_"+tokes[4]
-			labels['node']=nodemap[tokes[2]]
+			try:
+				labels['node']=nodemap[tokes[2]]
+			except:
+				makenodemap()
+				labels['node']=nodemap[tokes[2]]
 			labels['link']=tokes[3]
 	elif tokes[1] == 'srp' or tokes[1] == 'pg':
 		retname = tokes[1]+"_"+tokes[2]
@@ -93,6 +97,22 @@ def start_custom_http_server(port, addr=''):
 	t.daemon = True
 	t.start()
 
+def makenodemap():
+	stdoutdata = subprocess.getoutput("corosync-cmapctl nodelist.node")
+	while stdoutdata == "Failed to initialize the cmap API. Error CS_ERR_LIBRARY":
+		stdoutdata = subprocess.getoutput("corosync-cmapctl nodelist.node")
+		time.sleep(1)
+	interim = [line.split() for line in stdoutdata.split('\n')]
+	for i in interim:
+		tokes=i[0].split('.')
+		if tokes[3] == 'name': # Generate name=>statID map
+			namemap[tokes[2]]=i[3]
+		if tokes[3] == 'nodeid':
+			idmap[tokes[2]]="node"+i[3] # Generate nodeID=>statID map
+	for i in namemap: # From A and B, make name=>nodeID map
+		nodemap[idmap[i]]=namemap[i]
+
+
 if __name__ == '__main__':
 	idmap = {}
 	namemap = {}
@@ -105,6 +125,9 @@ if __name__ == '__main__':
 	# nodelist.node.22.ring0_addr (str) = 42.0.69.69
 	# nodelist.node.22.ring1_addr (str) = 112.35.8.13
 	stdoutdata = subprocess.getoutput("corosync-cmapctl nodelist.node")
+	while stdoutdata == "Failed to initialize the cmap API. Error CS_ERR_LIBRARY":
+		stdoutdata = subprocess.getoutput("corosync-cmapctl nodelist.node")
+		time.sleep(1)
 	interim = [line.split() for line in stdoutdata.split('\n')]
 	for i in interim:
 		tokes=i[0].split('.')
