@@ -47,12 +47,12 @@ def get_metric_name(name):
 			#labels['pid']=tokes[3]
 			#labels['internalid']=tokes[4]
 	elif tokes[1] == 'corosync':
-		retname = 'corosync_rss'
+		retname = 'rss'
 	elif tokes[1] == 'schedmiss':
 		retname = 'schedmiss_'+tokes[3]
 		labels['index'] = tokes[2]
 
-	return retname, labels
+	return "corosync_"+retname, labels
 
 # Reads metrics from corosync-cmapctl when called
 def update():
